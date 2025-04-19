@@ -25,9 +25,12 @@ public class ReactiveRedisQueueManager implements QueueManager {
         String key = WAITING_QUEUE_KEY_TEMPLATE.formatted(queueName);
 
         return redisTemplate.opsForZSet()
-                .add(key, id, timestamp.getEpochSecond())
-                .filter(i -> i)
-                .switchIfEmpty(Mono.error(new RuntimeException("Already Registered")))
+                .remove(key, id)
+                .then(redisTemplate.opsForZSet()
+                        .add(key, id, timestamp.getEpochSecond())
+                        .filter(i -> i)
+                        .switchIfEmpty(Mono.error(new RuntimeException("Failed to register in queue")))
+                )
                 .flatMap(i -> getOrder(queueName, id));
     }
 

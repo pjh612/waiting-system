@@ -62,7 +62,6 @@ public class AllowWaitingUserService implements AllowWaitingUserUseCase {
                 .subscribe();
     }
 
-
     private Mono<Void> sendWaitingQueueUpdate(UserPosition users, NamedAlertChannel alertChannel) {
         return alertManager.notice(alertChannel, users.getUserId(), Map.of("position", users.getPosition()));
     }
