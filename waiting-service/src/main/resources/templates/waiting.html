@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>잠시만 기다려주세요...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            margin-top: 50px;
+            font-size: 2.5em;
+            color: #343a40;
+        }
+
+        .queue-info {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+
+        .queue-info p {
+            margin: 10px 0;
+            font-size: 1.2em;
+            color: #495057;
+        }
+
+        .queue-info {
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        .loading {
+            margin-top: 30px;
+            font-size: 1.1em;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="queue-info" aria-live="polite">
+    <p>현재 접속자가 많아 대기 중입니다.</p>
+    <p>대기 순번: <span id="position" class="highlight" th:text="${position}"></span></p>
+    <p>사용자 ID: <span th:text="${id}"></span></p>
+</div>
+<div class="loading">
+    <p>잠시만 기다려 주세요...</p>
+    <p>브라우저를 닫지 마세요!</p>
+</div>
+
+<script>
+    const subscribe = () => {
+        const alarm = new EventSource(`/api/waiting/subscribe?token=[[${token}]]`);
+        alarm.addEventListener('MESSAGE', (e) => {
+            try {
+                const parse = JSON.parse(e.data);
+                if (parse.redirectUrl) {
+                    window.location.href = `${parse.redirectUrl}?token=${parse.token}`;
+                }
+                if (parse.position) {
+                    document.getElementById("position").textContent = parse.position;
+                }
+            } catch (error) {
+                console.error("Failed to process message", error);
+            }
+        });
+    }
+    subscribe();
+</script>
+</body>
+</html>
