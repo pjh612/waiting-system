@@ -17,6 +17,6 @@ public class SubscribeWaitingResultService implements SubscribeWaitingResultUseC
 
     @Override
     public Flux<ServerSentEvent<Object>> subscribe(String queueName, String id, String lastEventId) {
-        return alertManager.subscribe(new NamedAlertChannel(queueName), id, lastEventId, Duration.ofSeconds(60).toMillis());
+        return alertManager.subscribe(new NamedAlertChannel(queueName), id, lastEventId, Duration.ofMinutes(3).toMillis());
     }
 }

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
+    <script type="module" th:src="@{/js/waiting.js}"></script>
     <meta charset="UTF-8">
     <title>잠시만 기다려주세요...</title>
     <style>
@@ -62,23 +63,7 @@
 </div>
 
 <script>
-    const subscribe = () => {
-        const alarm = new EventSource(`/api/waiting/subscribe?token=[[${token}]]`);
-        alarm.addEventListener('MESSAGE', (e) => {
-            try {
-                const parse = JSON.parse(e.data);
-                if (parse.redirectUrl) {
-                    window.location.href = `${parse.redirectUrl}?token=${parse.token}`;
-                }
-                if (parse.position) {
-                    document.getElementById("position").textContent = parse.position;
-                }
-            } catch (error) {
-                console.error("Failed to process message", error);
-            }
-        });
-    }
-    subscribe();
+    let token = '[[${token}]]';
 </script>
 </body>
 </html>

@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -40,11 +42,21 @@ public class UserWaitingController {
     }
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ServerSentEvent<Object>> subscribe(@RequestParam String token, @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
+    public Flux<ServerSentEvent<Object>> subscribe(
+            @RequestHeader String token,
+            @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId) {
         Map<String, ?> claims = jwtTokenProvider.getClaims(token);
         String id = claims.get("userId").toString();
         String queueName = claims.get("queueName").toString();
+        String newToken = jwtTokenProvider.generateToken(new HashMap<>(claims), Duration.ofMinutes(5).toMillis());
 
-        return subscribeWaitingResultUseCase.subscribe(queueName, id, lastEventId);
+        return Flux.concat(
+                Flux.just(ServerSentEvent.builder()
+                        .event("TOKEN_UPDATE")
+                        .data(newToken)
+                        .build()),
+                subscribeWaitingResultUseCase.subscribe(queueName, id, lastEventId)
+        );
     }
+
 }
