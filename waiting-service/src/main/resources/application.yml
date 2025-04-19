@@ -1,0 +1,40 @@
+spring:
+  r2dbc:
+    url: r2dbc:mysql://localhost:3306/waiting
+    password: password
+    username: root
+  application:
+    name: waiting-service
+  kafka:
+    client-id: payments
+    consumer:
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      group-id: waiting-service
+    bootstrap-servers: localhost:9092
+    listener:
+      concurrency: 1
+      missing-topics-fatal: true
+  data:
+    redis:
+      cluster:
+        nodes:
+          - localhost:6479
+          - localhost:6480
+          - localhost:6481
+          - localhost:6482
+          - localhost:6483
+          - localhost:6484
+      password: bitnami
+
+server:
+  port: 8081
+logging:
+  level:
+    web: debug
+secret: "waitinggnitiawwaitinggnitiawwaitinggnitiawwaitinggnitiaw"
+
+alert:
+  reactive: true
+  bridge: kafka
+  topics: "test-queue"
