@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: testweb
+server:
+  port: 8080
+logging:
+  level:
+    web: debug
+
+waiting-queue:
+  key: $2a$10$SxutPlQV50WljccM84GrKeJpEcOWKrw10dxMSR9FPMZSrPBfpZoTi
+
+secret: "testwebbewtsettestwebbewtsettestwebbewtsettestwebbewtset"
