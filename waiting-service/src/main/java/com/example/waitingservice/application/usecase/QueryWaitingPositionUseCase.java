@@ -5,5 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface QueryWaitingPositionUseCase {
 
-    Mono<WaitingPositionResponse> getOrder(String queueName, String id);
+    Mono<WaitingPositionResponse> getPosition(String queueName, String id);
 }

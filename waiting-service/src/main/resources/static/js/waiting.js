@@ -30,3 +30,30 @@ const subscribe = () => {
     });
 }
 subscribe();
+
+const updatePosition = () => {
+    fetch('/api/waiting/position', {
+        method: 'GET',
+        headers: {
+            "token" : token, // 토큰 인증
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch position');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const positionElement = document.getElementById('position');
+            if (data.position !== undefined) {
+                positionElement.textContent = data.position;
+            }
+        })
+        .catch(error => {
+            console.error('Error updating position:', error);
+        });
+};
+
+setInterval(updatePosition, 5000);

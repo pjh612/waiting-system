@@ -31,7 +31,6 @@ public class RegisterWaitingService implements RegisterWaitingUseCase {
         NamedAlertChannel alertChannel = new NamedAlertChannel(queueName);
 
         return queuePort.registerWaiting(queueName, id, now)
-                .doOnSuccess(users -> alertPositionUpdated(queueName, alertChannel))
                 .map(it -> {
                     Map<String, Object> data = new HashMap<>();
                     data.put("userId", id);
@@ -42,15 +41,5 @@ public class RegisterWaitingService implements RegisterWaitingUseCase {
 
                     return new RegisterWaitingResponse(it, token);
                 });
-    }
-
-    private void alertPositionUpdated(String queueName, NamedAlertChannel alertChannel) {
-        queuePort.getWaitingUsers(queueName)
-                .flatMap(user -> sendWaitingQueueUpdate(user, alertChannel))
-                .subscribe();
-    }
-
-    private Mono<Void> sendWaitingQueueUpdate(UserPosition users, NamedAlertChannel alertChannel) {
-        return alertManager.notice(alertChannel, users.getUserId(), Map.of("position", users.getPosition()));
     }
 }

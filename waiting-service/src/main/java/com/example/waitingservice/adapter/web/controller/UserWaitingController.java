@@ -1,11 +1,9 @@
 package com.example.waitingservice.adapter.web.controller;
 
 import com.example.waitingservice.application.JwtTokenProvider;
-import com.example.waitingservice.application.dto.AllowWaitingUserRequest;
-import com.example.waitingservice.application.dto.AllowWaitingUserResponse;
-import com.example.waitingservice.application.dto.RegisterWaitingRequest;
-import com.example.waitingservice.application.dto.RegisterWaitingResponse;
+import com.example.waitingservice.application.dto.*;
 import com.example.waitingservice.application.usecase.AllowWaitingUserUseCase;
+import com.example.waitingservice.application.usecase.QueryWaitingPositionUseCase;
 import com.example.waitingservice.application.usecase.RegisterWaitingUseCase;
 import com.example.waitingservice.application.usecase.SubscribeWaitingResultUseCase;
 import com.example.waitingservice.domain.model.WaitingQueue;
@@ -29,6 +27,7 @@ public class UserWaitingController {
     private final RegisterWaitingUseCase registerWaitingUseCase;
     private final AllowWaitingUserUseCase allowWaitingUserUseCase;
     private final SubscribeWaitingResultUseCase subscribeWaitingResultUseCase;
+    private final QueryWaitingPositionUseCase queryWaitingPositionUseCase;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping
@@ -57,6 +56,15 @@ public class UserWaitingController {
                         .build()),
                 subscribeWaitingResultUseCase.subscribe(queueName, id, lastEventId)
         );
+    }
+
+    @GetMapping("/position")
+    public Mono<WaitingPositionResponse> getPosition(@RequestHeader String token) {
+        Map<String, ?> claims = jwtTokenProvider.getClaims(token);
+        String queueName = (String) claims.get("queueName");
+        String userId = (String) claims.get("userId");
+
+        return queryWaitingPositionUseCase.getPosition(queueName, userId);
     }
 
 }

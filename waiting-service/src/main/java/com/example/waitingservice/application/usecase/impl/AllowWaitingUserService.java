@@ -52,17 +52,6 @@ public class AllowWaitingUserService implements AllowWaitingUserUseCase {
                         })
                 )
                 .collectList()
-                .doOnSuccess(users -> alertPositionUpdated(queueName, alertChannel))
                 .map(typedTuples -> new AllowWaitingUserResponse(count, (long) typedTuples.size())); // 최종 결과 매핑
-    }
-
-    private void alertPositionUpdated(String queueName, NamedAlertChannel alertChannel) {
-        queuePort.getWaitingUsers(queueName)
-                .flatMap(user -> sendWaitingQueueUpdate(user, alertChannel))
-                .subscribe();
-    }
-
-    private Mono<Void> sendWaitingQueueUpdate(UserPosition users, NamedAlertChannel alertChannel) {
-        return alertManager.notice(alertChannel, users.getUserId(), Map.of("position", users.getPosition()));
     }
 }
