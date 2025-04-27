@@ -1,7 +1,7 @@
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/waiting
-    password: password
+    url: r2dbc:mysql://mysql.mysql.svc.cluster.local:3306/waiting
+    password: PASSWORD
     username: root
   application:
     name: waiting-service
@@ -11,7 +11,7 @@ spring:
       auto-offset-reset: earliest
       enable-auto-commit: true
       group-id: waiting-service
-    bootstrap-servers: localhost:9092, localhost:9095,  localhost:9096
+    bootstrap-servers: my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
     listener:
       concurrency: 1
       missing-topics-fatal: true
@@ -19,16 +19,18 @@ spring:
     redis:
       cluster:
         nodes:
-          - localhost:6479
-          - localhost:6480
-          - localhost:6481
-          - localhost:6482
-          - localhost:6483
-          - localhost:6484
-      password: bitnami
+          - redis-0.redis-headless.redis.svc.cluster.local:6379
+          - redis-1.redis-headless.redis.svc.cluster.local:6379
+          - redis-2.redis-headless.redis.svc.cluster.local:6379
+          - redis-3.redis-headless.redis.svc.cluster.local:6379
+          - redis-4.redis-headless.redis.svc.cluster.local:6379
+          - redis-5.redis-headless.redis.svc.cluster.local:6379
 
 server:
   port: 8081
+  tomcat:
+    mbeanregistry:
+      enabled: true
 logging:
   level:
     web: debug
@@ -38,6 +40,7 @@ alert:
   reactive: true
   bridge: kafka
   topics: "test-queue"
+
 management:
   endpoints:
     web:

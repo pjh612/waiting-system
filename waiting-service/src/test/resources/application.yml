@@ -11,7 +11,7 @@ spring:
       auto-offset-reset: earliest
       enable-auto-commit: true
       group-id: waiting-service
-    bootstrap-servers: localhost:9092, localhost:9095,  localhost:9096
+    bootstrap-servers: localhost:9092
     listener:
       concurrency: 1
       missing-topics-fatal: true
@@ -20,11 +20,6 @@ spring:
       cluster:
         nodes:
           - localhost:6479
-          - localhost:6480
-          - localhost:6481
-          - localhost:6482
-          - localhost:6483
-          - localhost:6484
       password: bitnami
 
 server:
