@@ -56,4 +56,4 @@ const updatePosition = () => {
         });
 };
 
-setInterval(updatePosition, 5000);
+// setInterval(updatePosition, 5000);
