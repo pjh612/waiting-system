@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waiting-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: waiting-service
+  template:
+    metadata:
+      labels:
+        app: waiting-service
+    spec:
+      containers:
+        - name: waiting-container
+          image: pjh612/waiting-system:1.1.8
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8081

@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+metadata:
+  name: stg-waiting-service
+
+resources:
+  - ../../base
+
+namespace: stg
+
+labels:
+  - includeSelectors: true
+    includeTemplates: true
+    pairs:
+      env: stg
+
+namePrefix: stg-
+
+patches:
+  - target:
+      kind: Deployment
+      name: waiting-service
+    patch: |
+      - op: replace
+        path: /spec/replicas
+        value: 5
+  - target:
+      kind: Ingress
+      name: waiting-service-ingress
+    patch: |
+      - op: add
+        path: /spec/rules/0/host
+        value: stg.example.com

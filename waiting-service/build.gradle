@@ -65,11 +65,13 @@ jib {
                 architecture = "amd64"
                 os = "linux"
             }
-        } // 기본 이미지
+        }
     }
     to {
-        image = rootProject.name + '-' + project.name + ":" + version
-        tags = ['latest']
+        def tagsValue = System.getProperty('tags') ?: 'latest'
+        def imageName = System.getProperty('image') ?: rootProject.name + '-' + project.name + ":" + version
+        image = imageName
+        tags = [tagsValue]
     }
 }
 
