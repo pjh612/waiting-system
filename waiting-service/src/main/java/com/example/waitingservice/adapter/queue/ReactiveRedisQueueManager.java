@@ -18,7 +18,6 @@ import java.time.Instant;
 public class ReactiveRedisQueueManager implements QueueManager {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
     private static final String WAITING_QUEUE_KEY_TEMPLATE = "wait:queue:%s";
-    private static final String PROCEED_QUEUE_KEY_TEMPLATE = "proceed:queue:%s";
 
     @Override
     public Mono<Long> registerWaiting(String queueName, String id, Instant timestamp) {
@@ -38,30 +37,11 @@ public class ReactiveRedisQueueManager implements QueueManager {
 
     @Override
     public Flux<QueueUser> allow(String queueName, Long count) {
-        long timestamp = Instant.now().getEpochSecond();
         String waitingQueueKey = WAITING_QUEUE_KEY_TEMPLATE.formatted(queueName);
-        String proceedQueueKey = PROCEED_QUEUE_KEY_TEMPLATE.formatted(queueName);
 
         return redisTemplate.opsForZSet()
                 .popMin(waitingQueueKey, count)
-                .flatMap(user -> addToProceedQueue(proceedQueueKey, user, timestamp)
-                        .thenReturn(new QueueUser(user.getValue(), user.getScore()))
-                );
-    }
-
-    private Mono<Boolean> addToProceedQueue(String proceedQueueKey, ZSetOperations.TypedTuple<String> user, long timestamp) {
-        return redisTemplate.opsForZSet()
-                .add(proceedQueueKey, user.getValue(), timestamp);
-    }
-
-    @Override
-    public Mono<Boolean> isAllowed(String queueName, String id) {
-        String proceedQueueKey = PROCEED_QUEUE_KEY_TEMPLATE.formatted(queueName);
-
-        return redisTemplate.opsForZSet()
-                .rank(proceedQueueKey, id)
-                .defaultIfEmpty(-1L)
-                .map(rank -> rank >= 0);
+                .map(user -> new QueueUser(user.getValue(), user.getScore()));
     }
 
     @Override

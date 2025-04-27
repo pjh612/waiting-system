@@ -12,8 +12,6 @@ public interface QueueManager {
 
     Flux<QueueUser> allow(String queueName, Long count);
 
-    Mono<Boolean> isAllowed(String queueName, String id);
-
     Mono<Long> getOrder(String queueName, String id);
 
     Flux<UserPosition> getWaitingUsers(String queueName);
