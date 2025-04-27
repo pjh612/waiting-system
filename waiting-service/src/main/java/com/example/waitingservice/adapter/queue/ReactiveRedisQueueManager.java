@@ -6,11 +6,11 @@ import com.example.waitingservice.domain.model.UserPosition;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Range;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
-import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.Instant;
 
 @Component
@@ -31,7 +31,9 @@ public class ReactiveRedisQueueManager implements QueueManager {
                         .filter(i -> i)
                         .switchIfEmpty(Mono.error(new RuntimeException("Failed to register in queue")))
                 )
-                .flatMap(i -> getOrder(queueName, id));
+                .flatMap(i -> redisTemplate.expire(key, Duration.ofDays(1))
+                        .then(getOrder(queueName, id))
+                );
     }
 
     @Override
