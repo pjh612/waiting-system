@@ -2,10 +2,7 @@ package com.example.waitingservice.adapter.web.controller;
 
 import com.example.waitingservice.application.JwtTokenProvider;
 import com.example.waitingservice.application.dto.*;
-import com.example.waitingservice.application.usecase.AllowWaitingUserUseCase;
-import com.example.waitingservice.application.usecase.QueryWaitingPositionUseCase;
-import com.example.waitingservice.application.usecase.RegisterWaitingUseCase;
-import com.example.waitingservice.application.usecase.SubscribeWaitingResultUseCase;
+import com.example.waitingservice.application.usecase.*;
 import com.example.waitingservice.domain.model.WaitingQueue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +25,7 @@ public class UserWaitingController {
     private final AllowWaitingUserUseCase allowWaitingUserUseCase;
     private final SubscribeWaitingResultUseCase subscribeWaitingResultUseCase;
     private final QueryWaitingPositionUseCase queryWaitingPositionUseCase;
+    private final TouchWaitingUserUseCase touchWaitingUserUseCase;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping
@@ -64,7 +62,9 @@ public class UserWaitingController {
         String queueName = (String) claims.get("queueName");
         String userId = (String) claims.get("userId");
 
-        return queryWaitingPositionUseCase.getPosition(queueName, userId);
+
+        return queryWaitingPositionUseCase.getPosition(queueName, userId)
+                .doOnSuccess(it-> touchWaitingUserUseCase.touch(queueName, userId));
     }
 
 }
