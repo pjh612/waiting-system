@@ -17,16 +17,11 @@ spring:
       missing-topics-fatal: true
   data:
     redis:
-      cluster:
-        nodes:
-          - localhost:6479
-      password: bitnami
+      host: localhost
+      port: 63790
 
 server:
   port: 8081
-logging:
-  level:
-    web: debug
 secret: "waitinggnitiawwaitinggnitiawwaitinggnitiawwaitinggnitiaw"
 
 alert:
