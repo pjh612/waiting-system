@@ -63,4 +63,11 @@ public class ReactiveRedisQueueManager implements QueueManager {
                 .index()
                 .map(tuple -> new UserPosition(tuple.getT2(), tuple.getT1() + 1));
     }
+
+    @Override
+    public Mono<Boolean> touch(String queueName, String id) {
+        String key = WAITING_QUEUE_KEY_TEMPLATE.formatted(queueName);
+
+        return redisTemplate.expire(key, Duration.ofMinutes(10));
+    }
 }

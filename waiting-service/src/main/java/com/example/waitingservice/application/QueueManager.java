@@ -15,4 +15,6 @@ public interface QueueManager {
     Mono<Long> getOrder(String queueName, String id);
 
     Flux<UserPosition> getWaitingUsers(String queueName);
+
+    Mono<Boolean> touch(String queueName, String userId);
 }
