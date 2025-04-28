@@ -1,8 +1,8 @@
-name: 'Build and Deploy to GKE'
+name: 'Build and Deploy to GKE - DEV'
 
 on:
   push:
-    branches: ["stg"]
+    branches: ["dev"]
 
 env:
   MODULE: 'waiting-service'
@@ -11,12 +11,12 @@ env:
   GAR_LOCATION: 'asia-northeast1'
   GKE_CLUSTER: 'test-cluster'
   GKE_ZONE: 'asia-northeast1-a'
-  DEPLOYMENT_NAME: 'stg-waiting-service'
+  DEPLOYMENT_NAME: 'dev-waiting-service'
   REPOSITORY: 'waiting-service-repo'
   IMAGE: 'pjh612/waiting-system'
   WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GKE_WORKLOAD_IDENTITY_PROVIDER }}
-  PROFILE: 'stg'
-  
+  PROFILE: 'dev'
+
 
 jobs:
   setup-build-publish-deploy:
