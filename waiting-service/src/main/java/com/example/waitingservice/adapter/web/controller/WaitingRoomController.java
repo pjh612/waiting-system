@@ -5,6 +5,7 @@ import com.example.waitingservice.application.usecase.QueryWaitingPositionUseCas
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.result.view.Rendering;
 import reactor.core.publisher.Mono;
 
@@ -35,5 +36,11 @@ public class WaitingRoomController {
                         .modelAttribute("token", token)
                         .modelAttribute("position", it.position())
                         .build()));
+    }
+
+    @GetMapping
+    @ResponseBody
+    public Mono<String> hello() {
+        return Mono.just("hello updated");
     }
 }
