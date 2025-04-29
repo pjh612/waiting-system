@@ -40,7 +40,6 @@ jobs:
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2' # google-github-actions/auth@v2
         with:
-          token_format: access_token
           workload_identity_provider: '${{ env.WORKLOAD_IDENTITY_PROVIDER }}'
           project_id: '${{ env.PROJECT_ID }}'
           service_account: '${{ env.EMAIL }}'
@@ -59,7 +58,6 @@ jobs:
         with:
           cluster_name: '${{ env.GKE_CLUSTER }}'
           location: '${{ env.GKE_ZONE }}'
-          project_id: '${{ env.PROJECT_ID }}'
 
       # Build the Docker image
       - name: 'Build and push Docker container'

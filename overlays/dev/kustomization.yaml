@@ -24,6 +24,9 @@ patches:
       - op: replace
         path: /spec/replicas
         value: 1
+      - op: replace
+        path: /spec/template/spec/containers/0/image
+        value: ${IMAGE_NAME}
   - target:
       kind: Ingress
       name: waiting-service-ingress
