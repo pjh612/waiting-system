@@ -42,6 +42,12 @@ alert:
   topics: "test-queue"
 
 management:
+  tracing:
+    propagation:
+      type: w3c
+    enabled: true
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:

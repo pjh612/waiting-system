@@ -2,6 +2,7 @@ package com.example.waitingservice.adapter.web.controller;
 
 import com.example.waitingservice.application.JwtTokenProvider;
 import com.example.waitingservice.application.usecase.QueryWaitingPositionUseCase;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +40,7 @@ public class WaitingRoomController {
     }
 
     @GetMapping
+    @WithSpan
     @ResponseBody
     public Mono<String> hello() {
         return Mono.just("hello updated");
