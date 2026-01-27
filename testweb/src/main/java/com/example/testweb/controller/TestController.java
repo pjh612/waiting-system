@@ -6,6 +6,7 @@ import com.example.testweb.jwt.JwtTokenProvider;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,9 @@ import java.util.Map;
 public class TestController {
     private final WaitingClient waitingClient;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Value("${waiting-service.url}")
+    private String waitingServiceUrl;
 
     public TestController(WaitingClient waitingClient, JwtTokenProvider jwtTokenProvider) {
         this.waitingClient = waitingClient;
@@ -38,7 +42,7 @@ public class TestController {
 
         RegisterWaitingResponse register = waitingClient.register(user.getUsername());
 
-        String waitingPageUrl = "http://localhost:8081/waiting?token=" + register.token();
+        String waitingPageUrl = waitingServiceUrl + "/waiting?token=" + register.token();
         return "redirect:" + waitingPageUrl;
     }
 
@@ -50,7 +54,7 @@ public class TestController {
 
         String tk = jwtTokenProvider.generateToken(Map.of("userId", userId, "queueName", queueName), Duration.ofMinutes(30).toMillis());
 
-        response.addCookie(new Cookie("abc",tk));
+        response.addCookie(new Cookie("abc", tk));
 
         return "redirect:" + "http://localhost:8080/test";
     }

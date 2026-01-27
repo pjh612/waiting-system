@@ -1,10 +1,10 @@
 package com.example.waitingservice.adapter.cache.redis;
 
 import com.example.waitingservice.application.ReactiveCacheManager;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.ObjectMapper;
 
 @Component
 public class ReactiveRedisCacheManager implements ReactiveCacheManager {

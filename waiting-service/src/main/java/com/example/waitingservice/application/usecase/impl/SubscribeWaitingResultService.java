@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +18,6 @@ public class SubscribeWaitingResultService implements SubscribeWaitingResultUseC
 
     @Override
     public Flux<ServerSentEvent<Object>> subscribe(String queueName, String id, String lastEventId) {
-        return alertManager.subscribe(new NamedAlertChannel(queueName), id, lastEventId, Duration.ofMinutes(3).toMillis());
+        return alertManager.subscribe(new NamedAlertChannel(queueName), id, List.of(queueName), lastEventId, Duration.ofMinutes(3).toMillis());
     }
 }

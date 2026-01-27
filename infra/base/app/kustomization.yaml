@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - mysql.yaml
+  - redis-cluster.yaml
+  - kafka.yaml
+  - waiting-service.yaml
+  - kafka-ui.yaml
+
+namespace: infra-dev
+
+configMapGenerator:
+  - name: waiting-service-env
+
+secretGenerator:
+  - name: db-pass
+    literals:
+      - password=default-password

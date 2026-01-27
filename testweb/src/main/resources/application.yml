@@ -11,3 +11,6 @@ waiting-queue:
   key: $2a$10$SxutPlQV50WljccM84GrKeJpEcOWKrw10dxMSR9FPMZSrPBfpZoTi
 
 secret: "testwebbewtsettestwebbewtsettestwebbewtsettestwebbewtset"
+
+waiting-service:
+    url: http://localhost:8082

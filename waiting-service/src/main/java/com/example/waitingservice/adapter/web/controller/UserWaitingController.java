@@ -1,15 +1,27 @@
 package com.example.waitingservice.adapter.web.controller;
 
 import com.example.waitingservice.application.JwtTokenProvider;
-import com.example.waitingservice.application.dto.*;
-import com.example.waitingservice.application.usecase.*;
+import com.example.waitingservice.application.dto.AllowWaitingUserRequest;
+import com.example.waitingservice.application.dto.AllowWaitingUserResponse;
+import com.example.waitingservice.application.dto.RegisterWaitingRequest;
+import com.example.waitingservice.application.dto.RegisterWaitingResponse;
+import com.example.waitingservice.application.dto.WaitingPositionResponse;
+import com.example.waitingservice.application.usecase.AllowWaitingUserUseCase;
+import com.example.waitingservice.application.usecase.QueryWaitingPositionUseCase;
+import com.example.waitingservice.application.usecase.RegisterWaitingUseCase;
+import com.example.waitingservice.application.usecase.SubscribeWaitingResultUseCase;
+import com.example.waitingservice.application.usecase.TouchWaitingUserUseCase;
 import com.example.waitingservice.domain.model.WaitingQueue;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,7 +46,7 @@ public class UserWaitingController {
     }
 
     @PostMapping("/allow")
-    public Mono<AllowWaitingUserResponse> allowWaitingUser(@RequestBody AllowWaitingUserRequest request, @AuthenticationPrincipal WaitingQueue waitingQueue) throws JsonProcessingException {
+    public Mono<AllowWaitingUserResponse> allowWaitingUser(@RequestBody AllowWaitingUserRequest request, @AuthenticationPrincipal WaitingQueue waitingQueue) {
         return allowWaitingUserUseCase.allow(waitingQueue.getApiKey(), waitingQueue.getName(), request.count(), waitingQueue.getRedirectUrl());
     }
 
@@ -50,7 +62,7 @@ public class UserWaitingController {
         return Flux.concat(
                 Flux.just(ServerSentEvent.builder()
                         .event("TOKEN_UPDATE")
-                        .data(newToken)
+                        .data(Map.of("token", newToken))
                         .build()),
                 subscribeWaitingResultUseCase.subscribe(queueName, id, lastEventId)
         );
@@ -64,7 +76,8 @@ public class UserWaitingController {
 
 
         return queryWaitingPositionUseCase.getPosition(queueName, userId)
-                .doOnSuccess(it-> touchWaitingUserUseCase.touch(queueName, userId));
+                .flatMap(response -> touchWaitingUserUseCase.touch(queueName, userId)
+                        .thenReturn(response));
     }
 
 }

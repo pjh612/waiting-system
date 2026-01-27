@@ -1,0 +1,21 @@
+### 입장 허용
+
+POST http://hello-world.waiting:8000/api/waiting/allow
+Content-Type: application/json
+Authorization: $2a$10$SxutPlQV50WljccM84GrKeJpEcOWKrw10dxMSR9FPMZSrPBfpZoTi
+
+{
+ "count": 1
+}
+
+### health
+GET http://hello-world.waiting:8000/
+
+### 대기열 등록
+POST http://hello-world.waiting:8000/api/waiting
+Content-Type: application/json
+Authorization: $2a$10$SxutPlQV50WljccM84GrKeJpEcOWKrw10dxMSR9FPMZSrPBfpZoTi
+
+{
+ "id": "asdf"
+}

@@ -1,7 +1,7 @@
 spring:
   r2dbc:
-    url: r2dbc:mysql://mysql.mysql.svc.cluster.local:3306/waiting
-    password: PASSWORD
+    url: r2dbc:mysql://mysql.infra-dev.svc.cluster.local:3306/waiting
+    password: root_password
     username: root
   application:
     name: waiting-service
@@ -11,7 +11,7 @@ spring:
       auto-offset-reset: earliest
       enable-auto-commit: true
       group-id: waiting-service
-    bootstrap-servers: my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+    bootstrap-servers: kafka.infra-dev.svc.cluster.local:9092
     listener:
       concurrency: 1
       missing-topics-fatal: true
@@ -19,13 +19,17 @@ spring:
     redis:
       cluster:
         nodes:
-          - redis-0.redis-headless.redis.svc.cluster.local:6379
-          - redis-1.redis-headless.redis.svc.cluster.local:6379
-          - redis-2.redis-headless.redis.svc.cluster.local:6379
-          - redis-3.redis-headless.redis.svc.cluster.local:6379
-          - redis-4.redis-headless.redis.svc.cluster.local:6379
-          - redis-5.redis-headless.redis.svc.cluster.local:6379
-
+          - redis-cluster-0.redis-cluster.infra-dev.svc.cluster.local:6379
+          - redis-cluster-1.redis-cluster.infra-dev.svc.cluster.local:6379
+          - redis-cluster-2.redis-cluster.infra-dev.svc.cluster.local:6379
+          - redis-cluster-3.redis-cluster.infra-dev.svc.cluster.local:6379
+          - redis-cluster-4.redis-cluster.infra-dev.svc.cluster.local:6379
+          - redis-cluster-5.redis-cluster.infra-dev.svc.cluster.local:6379
+redis-cluster:
+  infra-dev:
+    svc:
+      cluster:
+        local:6379:
 server:
   port: 8081
   tomcat:

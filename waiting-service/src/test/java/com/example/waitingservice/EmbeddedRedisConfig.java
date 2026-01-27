@@ -1,8 +1,10 @@
 package com.example.waitingservice;
 
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.test.util.TestSocketUtils;
 import redis.embedded.RedisServer;
 
 import java.io.IOException;
@@ -10,24 +12,32 @@ import java.io.IOException;
 @TestConfiguration
 public class EmbeddedRedisConfig {
 
-    private final RedisServer redisServer;
+    private static RedisServer redisServer;
+    private static int PORT;
+    private static final String HOST = "localhost";
 
-    public EmbeddedRedisConfig() throws IOException {
-        this.redisServer = new RedisServer(63790);
+    static {
+        PORT = TestSocketUtils.findAvailableTcpPort();
+        try {
+            redisServer = new RedisServer(PORT);
+            redisServer.start();
+
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                if (redisServer != null) {
+                    try {
+                        redisServer.stop();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }));
+        } catch (IOException e) {
+            throw new RuntimeException("Embedded Redis 시작 실패", e);
+        }
     }
 
-    @PostConstruct
-    public void start() throws IOException {
-        // 2️. EmbeddedRedis 생성 후 → start() 호출 (Redis 서버 시작)
-        this.redisServer.start();
-    }
-
-    // 3. 테스트 실행
-
-    @PreDestroy
-    public void stop() throws IOException {
-        // 4. EmbeddedRedis 소멸 전 → stop() 호출 (Redis 서버 종료)
-        this.redisServer.stop();
+    @Bean
+    public LettuceConnectionFactory redisConnectionFactory() {
+        return new LettuceConnectionFactory(new RedisStandaloneConfiguration(HOST, PORT));
     }
 }
-

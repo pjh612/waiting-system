@@ -1,5 +1,11 @@
-FROM bellsoft/liberica-openjre-alpine:17
-EXPOSE 8081
-ARG JAR_FILE
-COPY ${JAR_FILE} app.jar
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+FROM bellsoft/liberica-openjre-alpine:21
+WORKDIR /app
+
+COPY opentelemetry-javaagent.jar /opentelemetry-javaagent.jar
+RUN chmod 755 /opentelemetry-javaagent.jar
+
+COPY waiting-service/build/libs/*.jar app.jar
+
+ENV OTEL_SERVICE_NAME="waiting-service"
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

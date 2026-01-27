@@ -21,14 +21,13 @@ public class QueryWaitingQueueService implements QueryWaitingQueueUseCase {
 
     public Mono<WaitingQueueResponse> getWaitingQueue(String apiKey) {
         String cacheKey = "queue:" + apiKey;
-        Mono<WaitingQueueResponse> waitingQueueResponseMono = waitingQueueRepository.findByApiKey(apiKey)
-                .map(it -> new WaitingQueueResponse(it.getQueueId(), it.getClientId(), it.getName(),
-                        it.getRedirectUrl(), it.getSize(), it.getApiKey(), it.getSecret()));
 
         return cacheProvider.getOrSet(cacheKey,
-                waitingQueueResponseMono,
+                waitingQueueRepository.findByApiKey(apiKey)
+                        .map(it -> new WaitingQueueResponse(it.getQueueId(), it.getClientId(), it.getName(),
+                                it.getRedirectUrl(), it.getSize(), it.getApiKey(), it.getSecret())),
                 WaitingQueueResponse.class,
                 3600
-        ).doOnNext(it-> log.info("GetWaitingQueue: {}", it));
+        ).doOnNext(it-> log.debug("GetWaitingQueue: {}", it));
     }
 }

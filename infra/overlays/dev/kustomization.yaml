@@ -1,0 +1,33 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: dev-waiting-service
+
+resources:
+  - ../../base/app
+
+labels:
+  - pairs:
+      env: dev
+
+configMapGenerator:
+  - name: waiting-service-env
+    behavior: merge
+    literals:
+      - SPRING_PROFILES_ACTIVE=gke
+      - LOGGING_LEVEL_ROOT=INFO
+      - LOGGING_LEVEL_WEB=INFO
+      - LOGGING_LEVEL_COM_ALERT=INFO
+      - MANAGEMENT_TRACING_SAMPLING_PROBABILITY=0.1
+      - OTEL_TRACES_SAMPLER_ARG=0.1
+      - SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE=100
+      - SPRING_DATA_REDIS_CLUSTER_NODES=redis-cluster-0.redis-cluster.infra-dev.svc.cluster.local:6379,redis-cluster-1.redis-cluster.infra-dev.svc.cluster.local:6379,redis-cluster-2.redis-cluster.infra-dev.svc.cluster.local:6379,redis-cluster-3.redis-cluster.infra-dev.svc.cluster.local:6379,redis-cluster-4.redis-cluster.infra-dev.svc.cluster.local:6379,redis-cluster-5.redis-cluster.infra-dev.svc.cluster.local:6379
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector.monitoring.svc.cluster.local:4317
+
+secretGenerator:
+  - name: db-pass
+    behavior: merge
+    literals:
+      - password=dev-password
+

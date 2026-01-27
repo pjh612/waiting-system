@@ -1,8 +1,11 @@
 spring:
   r2dbc:
-    url: r2dbc:mysql://localhost:3306/waiting
-    password: password
-    username: root
+    url: r2dbc:h2:mem:///waiting;MODE=MYSQL;DATABASE_TO_UPPER=false
+    username: sa
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
   application:
     name: waiting-service
   kafka:
@@ -19,6 +22,7 @@ spring:
     redis:
       host: localhost
       port: 63790
+
 
 server:
   port: 8081
