@@ -15,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 
 @Service
@@ -62,7 +63,7 @@ public class AllowWaitingUserService implements AllowWaitingUserUseCase {
                 queue.secret()
         );
 
-        return alertManager.notice(alertChannel, user.getId(), Map.of("redirectUrl", redirectUrl, "token", token))
+        return alertManager.notice(alertChannel, user.getId(), Map.of("redirectUrl", redirectUrl, "token", token, "timestamp", Instant.now().toEpochMilli()))
                 .thenReturn(user);
     }
 
