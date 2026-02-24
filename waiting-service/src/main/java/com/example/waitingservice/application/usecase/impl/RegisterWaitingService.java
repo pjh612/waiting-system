@@ -32,7 +32,7 @@ public class RegisterWaitingService implements RegisterWaitingUseCase {
                     data.put("order", it);
                     String token = jwtTokenProvider.generateToken(data, Duration.ofMinutes(5).toMillis());
 
-                    return new RegisterWaitingResponse(it, token);
+                    return new RegisterWaitingResponse(it, token, now.toEpochMilli());
                 });
     }
 }

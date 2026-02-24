@@ -74,6 +74,87 @@ class UserWaitingControllerTest {
 
     @Test
     @WithMockUser
+    void register_응답에_eventId가_포함된다() {
+        RegisterClientResponse registerClientResponse = registerClientUseCase.register(new RegisterClientRequest("test", "waitinggnitiawwaitinggnitiawwaitinggnitiawwaitinggnitiaw"))
+                .block();
+        RegisterWaitingQueueResponse registerWaitingQueueResponse = registerWaitingQueueUseCase.register(registerClientResponse.id(), "test-queue", "redirect-url", 1000L, "secret").block();
+
+        long beforeRegister = System.currentTimeMillis();
+
+        RegisterWaitingResponse response = webTestClient.post()
+                .uri("/api/waiting")
+                .header("Authorization", registerWaitingQueueResponse.key())
+                .bodyValue(new RegisterWaitingRequest("id-1"))
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(RegisterWaitingResponse.class)
+                .getResponseBody()
+                .blockFirst();
+
+        long afterRegister = System.currentTimeMillis();
+
+        assertThat(response).isNotNull();
+        assertThat(response.eventId()).isBetween(beforeRegister, afterRegister);
+    }
+
+    @Test
+    @WithMockUser
+    void allow가_subscribe보다_먼저_발생해도_lastEventId로_메시지를_수신한다() throws InterruptedException {
+        RegisterClientResponse registerClientResponse = registerClientUseCase.register(new RegisterClientRequest("test", "waitinggnitiawwaitinggnitiawwaitinggnitiawwaitinggnitiaw"))
+                .block();
+        RegisterWaitingQueueResponse registerWaitingQueueResponse = registerWaitingQueueUseCase.register(registerClientResponse.id(), "test-queue", "redirect-url", 1000L, "waitinggnitiawwaitinggnitiawwaitinggnitiawwaitinggnitiaw").block();
+
+        // 1. 사용자 등록 → eventId 수령
+        RegisterWaitingResponse registerResponse = webTestClient.post()
+                .uri("/api/waiting")
+                .header("Authorization", registerWaitingQueueResponse.key())
+                .bodyValue(new RegisterWaitingRequest("id-race"))
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(RegisterWaitingResponse.class)
+                .getResponseBody()
+                .blockFirst();
+
+        assertThat(registerResponse).isNotNull();
+        String token = registerResponse.token();
+        String eventId = String.valueOf(registerResponse.eventId());
+
+        // 2. subscribe 전에 allow 먼저 실행 (race condition 재현)
+        webTestClient.post()
+                .uri("/api/waiting/allow")
+                .header("Authorization", registerWaitingQueueResponse.key())
+                .bodyValue(new AllowWaitingUserRequest(1L))
+                .exchange()
+                .expectStatus().isOk();
+
+        // Kafka 메시지 전파 대기
+        Thread.sleep(1000);
+
+        // 3. Last-Event-ID를 register 시점의 eventId로 설정하여 구독
+        Flux<ServerSentEvent<String>> eventStream = webTestClient.get()
+                .uri("/api/waiting/subscribe")
+                .header("token", token)
+                .header("Last-Event-ID", eventId)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .returnResult(new ParameterizedTypeReference<ServerSentEvent<String>>() {})
+                .getResponseBody();
+
+        // 4. allow 메시지가 캐시에서 복구되어 수신되는지 검증
+        StepVerifier.create(eventStream)
+                .thenAwait(Duration.ofSeconds(5))
+                .thenConsumeWhile(event -> {
+                    System.out.println("Event: " + event.event() + ": " + event.data());
+                    return !"MESSAGE".equals(event.event());
+                })
+                .expectNextMatches(event -> "MESSAGE".equals(event.event()))
+                .thenCancel()
+                .verify();
+    }
+
+    @Test
+    @WithMockUser
     void subscribe() {
         // 1000개의 사용자 요청 생성
         int userCount = 1;
