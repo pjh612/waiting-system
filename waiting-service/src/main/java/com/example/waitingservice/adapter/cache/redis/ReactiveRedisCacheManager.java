@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.function.Supplier;
+
 @Component
 public class ReactiveRedisCacheManager implements ReactiveCacheManager {
     private final ReactiveRedisTemplate<String, String> redisTemplate;
@@ -17,15 +19,14 @@ public class ReactiveRedisCacheManager implements ReactiveCacheManager {
     }
 
     @Override
-    public <T> Mono<T> getOrSet(String key, Mono<T> fallback, Class<T> type, long ttlSeconds) {
+    public <T> Mono<T> getOrSet(String key, Supplier<Mono<T>> fallback, Class<T> type, long ttlSeconds) {
         return redisTemplate.opsForValue()
                 .get(key)
                 .flatMap(value -> deserialize(value, type))
                 .switchIfEmpty(
-                        fallback.flatMap(data -> serialize(data)
+                        Mono.defer(fallback).flatMap(data -> serialize(data)
                                 .flatMap(serialized -> redisTemplate.opsForValue()
-                                        .set(key, serialized)
-                                        .then(redisTemplate.expire(key, java.time.Duration.ofSeconds(ttlSeconds)))
+                                        .set(key, serialized, java.time.Duration.ofSeconds(ttlSeconds))
                                         .thenReturn(data)
                                 )
                         )
