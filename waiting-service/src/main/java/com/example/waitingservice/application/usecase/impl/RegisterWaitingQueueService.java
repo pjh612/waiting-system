@@ -6,6 +6,7 @@ import com.example.waitingservice.domain.model.WaitingQueue;
 import com.example.waitingservice.domain.repository.WaitingQueueRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.util.UUID;
@@ -21,13 +22,18 @@ public class RegisterWaitingQueueService implements RegisterWaitingQueueUseCase 
     }
 
     @Override
+    @Transactional
     public Mono<RegisterWaitingQueueResponse> register(UUID clientId, String queueName, String redirectUrl, Long queueSize, String secret) {
-        UUID queueId = UUID.randomUUID();
-        String key = passwordEncoder.encode(queueId.toString());
-        WaitingQueue waitingQueue = new WaitingQueue(queueId, clientId, queueName, redirectUrl, queueSize, key, secret);
+        return waitingQueueRepository.findByClientIdAndQueueName(clientId, queueName)
+                .flatMap(existing -> Mono.<RegisterWaitingQueueResponse>error(
+                        new IllegalArgumentException("Queue with name '" + queueName + "' already exists for this client")))
+                .switchIfEmpty(Mono.defer(() -> {
+                    UUID queueId = UUID.randomUUID();
+                    String key = passwordEncoder.encode(queueId.toString());
+                    WaitingQueue waitingQueue = new WaitingQueue(queueId, clientId, queueName, redirectUrl, queueSize, key, secret);
 
-        //client key 생성 및 전달
-        return waitingQueueRepository.save(waitingQueue)
-                .map(RegisterWaitingQueueResponse::of);
+                    return waitingQueueRepository.save(waitingQueue)
+                            .map(RegisterWaitingQueueResponse::of);
+                }));
     }
 }
