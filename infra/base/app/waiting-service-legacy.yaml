@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: waiting-service-legacy
+  namespace: infra-dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: waiting-service-legacy
+  template:
+    metadata:
+      labels:
+        app: waiting-service-legacy
+    spec:
+      # [1] 두 컨테이너가 공유할 임시 저장소 선언
+      volumes:
+        - name: otel-agent-storage
+          emptyDir: {}
+
+      initContainers:
+        - name: downloader
+          image: alpine:latest # wget이 포함된 가벼운 이미지 권장
+          command: ["sh", "-c"]
+          args:
+            # [2] 공유 볼륨인 /data 경로에 다운로드
+            - wget -O /data/opentelemetry-javaagent.jar https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/latest/download/opentelemetry-javaagent.jar
+          volumeMounts:
+            - name: otel-agent-storage
+              mountPath: /data
+
+      containers:
+        - name: waiting-service-legacy
+          image: waiting-waiting-service-legacy:legacy
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: waiting-service-legacy-env
+          env:
+            # [3] Java가 뜰 때 자동으로 에이전트를 물고 뜨도록 설정
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/opentelemetry-javaagent.jar"
+          volumeMounts:
+            # [4] 다운로드된 파일을 루트(/)의 특정 파일 위치로 꽂아넣기
+            - name: otel-agent-storage
+              mountPath: /opentelemetry-javaagent.jar
+              subPath: opentelemetry-javaagent.jar
+          ports:
+            - containerPort: 8082
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: "2Gi"
+            limits:
+              cpu: "2000m"
+              memory: "2Gi"
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn # 핵심: 리스트에 없는 노드만 선택
+                    values:
+                      - gke-cluster-1-pool-3-a4f73a73-xql1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: waiting-service-legacy
+  namespace: infra-dev
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/path: "/actuator/prometheus"
+    prometheus.io/port: "8082"
+spec:
+  type: NodePort
+  ports:
+    - port: 8082
+      targetPort: 8082
+      nodePort: 31082
+  selector:
+    app: waiting-service-legacy

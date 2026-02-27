@@ -1,0 +1,18 @@
+# waiting-backend-config.yaml
+apiVersion: cloud.google.com/v1
+kind: BackendConfig
+metadata:
+  name: waiting-service-hc-config
+  namespace: infra-dev
+spec:
+  timeoutSec: 300  # 5분 (내부 테스트와 일치)
+  connectionDraining:
+    drainingTimeoutSec: 60
+  healthCheck:
+    checkIntervalSec: 10
+    timeoutSec: 5
+    healthyThreshold: 2
+    unhealthyThreshold: 3
+    type: HTTP
+    port: 8081
+    requestPath: /actuator/health
