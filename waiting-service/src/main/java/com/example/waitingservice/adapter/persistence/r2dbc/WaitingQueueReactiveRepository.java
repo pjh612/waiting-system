@@ -10,4 +10,6 @@ import java.util.UUID;
 @Repository
 public interface WaitingQueueReactiveRepository extends ReactiveCrudRepository<WaitingQueueEntity, UUID> {
     Mono<WaitingQueueEntity> findByApiKey(String key);
+
+    Mono<WaitingQueueEntity> findByClientIdAndQueueName(UUID clientId, String queueName);
 }

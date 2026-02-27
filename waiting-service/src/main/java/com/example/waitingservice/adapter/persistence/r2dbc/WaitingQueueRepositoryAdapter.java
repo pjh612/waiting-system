@@ -6,6 +6,8 @@ import com.example.waitingservice.domain.repository.WaitingQueueRepository;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Component
 public class WaitingQueueRepositoryAdapter implements WaitingQueueRepository {
     private final WaitingQueueReactiveRepository repository;
@@ -23,6 +25,12 @@ public class WaitingQueueRepositoryAdapter implements WaitingQueueRepository {
     @Override
     public Mono<WaitingQueue> findByApiKey(String apiKey) {
         return repository.findByApiKey(apiKey)
+                .map(WaitingQueueMapper::toDomain);
+    }
+
+    @Override
+    public Mono<WaitingQueue> findByClientIdAndQueueName(UUID clientId, String queueName) {
+        return repository.findByClientIdAndQueueName(clientId, queueName)
                 .map(WaitingQueueMapper::toDomain);
     }
 }
