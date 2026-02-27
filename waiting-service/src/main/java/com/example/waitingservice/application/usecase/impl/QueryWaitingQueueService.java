@@ -23,7 +23,7 @@ public class QueryWaitingQueueService implements QueryWaitingQueueUseCase {
         String cacheKey = "queue:" + apiKey;
 
         return cacheProvider.getOrSet(cacheKey,
-                waitingQueueRepository.findByApiKey(apiKey)
+                () -> waitingQueueRepository.findByApiKey(apiKey)
                         .map(it -> new WaitingQueueResponse(it.getQueueId(), it.getClientId(), it.getName(),
                                 it.getRedirectUrl(), it.getSize(), it.getApiKey(), it.getSecret())),
                 WaitingQueueResponse.class,
